@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulateur d'Intérêts Composés</title>
-    <!-- Intégration de Chart.js pour le graphique -->
+    <title>Simulateur d'Intérêts Composés avec Frais</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -14,6 +13,10 @@
             --card-bg: #ffffff;
             --text: #1e293b;
             --border: #e2e8f0;
+            --success: #166534;
+            --success-bg: #f0fdf4;
+            --success-border: #bbf7d0;
+            --gray-text: #475569;
         }
 
         body {
@@ -25,7 +28,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -41,7 +44,7 @@
             gap: 20px;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 992px) {
             .grid {
                 grid-template-columns: 1fr 2fr;
             }
@@ -55,6 +58,21 @@
             border: 1px solid var(--border);
         }
 
+        .section-title {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 5px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
         .form-group {
             margin-bottom: 16px;
         }
@@ -63,7 +81,7 @@
             display: block;
             margin-bottom: 6px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         input, select {
@@ -72,7 +90,7 @@
             border: 1px solid var(--border);
             border-radius: 6px;
             box-sizing: border-box;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
         input:focus, select:focus {
@@ -99,75 +117,134 @@
             background-color: var(--primary-hover);
         }
 
-        .result-box {
+        .results-container {
             margin-top: 24px;
-            padding: 16px;
-            background-color: #f0fdf4;
-            border: 1px solid #bbf7d0;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 480px) {
+            .results-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .result-box {
+            padding: 14px;
             border-radius: 8px;
             text-align: center;
         }
 
+        .result-box.with-fees {
+            background-color: var(--success-bg);
+            border: 1px solid var(--success-border);
+        }
+
+        .result-box.no-fees {
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+        }
+
         .result-box h3 {
-            margin: 0 0 8px 0;
-            color: #166534;
+            margin: 0 0 6px 0;
+            font-size: 0.9rem;
+            color: var(--gray-text);
+        }
+
+        .result-box.with-fees h3 {
+            color: var(--success);
         }
 
         .result-value {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: bold;
+        }
+
+        .result-box.with-fees .result-value {
             color: #15803d;
+        }
+
+        .result-box.no-fees .result-value {
+            color: #334155;
         }
 
         .chart-container {
             position: relative;
             height: 100%;
-            min-height: 350px;
+            min-height: 450px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Simulateur d'Intérêts Composés</h1>
+    <h1>Simulateur d'Intérêts Composés avec Frais</h1>
     
     <div class="grid">
-        <!-- Formulaire de saisie -->
         <div class="card">
+            <div class="section-title">Paramètres du Placement</div>
+            
             <div class="form-group">
                 <label for="principal">Capital Initial (P) en € :</label>
-                <input type="number" id="principal" value="1000" min="0" step="100">
+                <input type="number" id="principal" value="10000" min="0" step="500">
             </div>
 
-            <div class="form-group">
-                <label for="rate">Taux d'intérêt annuel (r) en % :</label>
-                <input type="number" id="rate" value="5" min="0" step="0.1">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="rate">Taux annuel (r) en % :</label>
+                    <input type="number" id="rate" value="6" min="0" step="0.1">
+                </div>
+
+                <div class="form-group">
+                    <label for="years">Durée (t) en années :</label>
+                    <input type="number" id="years" value="10" min="1" step="1">
+                </div>
             </div>
 
             <div class="form-group">
                 <label for="compounding">Fréquence de capitalisation (n) :</label>
                 <select id="compounding">
-                    <option value="1">Annuelle (1/an)</option>
+                    <option value="1" selected>Annuelle (1/an)</option>
                     <option value="2">Semestrielle (2/an)</option>
                     <option value="4">Trimestrielle (4/an)</option>
-                    <option value="12" selected>Mensuelle (12/an)</option>
+                    <option value="12">Mensuelle (12/an)</option>
                 </select>
             </div>
 
+            <div class="section-title" style="margin-top: 25px;">Frais</div>
+
             <div class="form-group">
-                <label for="years">Durée (t) en années :</label>
-                <input type="number" id="years" value="10" min="1" step="1">
+                <label for="entryFee">Frais d'entrée (e) en % :</label>
+                <input type="number" id="entryFee" value="1" min="0" max="100" step="0.1">
             </div>
 
-            <button onclick="calculerInterets()">Calculer et tracer</button>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="custodyFee">Frais de garde (g) par an en % :</label>
+                    <input type="number" id="custodyFee" value="0.5" min="0" max="100" step="0.1">
+                </div>
 
-            <div class="result-box">
-                <h3>Capital Final à t :</h3>
-                <div id="final-result" class="result-value">0,00 €</div>
+                <div class="form-group">
+                    <label for="exitFee">Frais de sortie (s) en % :</label>
+                    <input type="number" id="exitFee" value="2" min="0" max="100" step="0.1">
+                </div>
+            </div>
+
+            <button onclick="calculerInterets()">Calculer et Comparer</button>
+
+            <div class="results-container">
+                <div class="result-box with-fees">
+                    <h3>Capital Final (Net) :</h3>
+                    <div id="result-with-fees" class="result-value">0,00 €</div>
+                </div>
+                <div class="result-box no-fees">
+                    <h3>Capital Sans Frais :</h3>
+                    <div id="result-no-fees" class="result-value">0,00 €</div>
+                </div>
             </div>
         </div>
 
-        <!-- Graphique -->
         <div class="card">
             <div class="chart-container">
                 <canvas id="interestChart"></canvas>
@@ -177,36 +254,61 @@
 </div>
 
 <script>
-    // Variable globale pour stocker l'instance du graphique Chart.js
     let myChart = null;
 
     function calculerInterets() {
-        // Récupération des valeurs des inputs
+        // Récupération et conversion des entrées
         const P = parseFloat(document.getElementById('principal').value) || 0;
         const r = (parseFloat(document.getElementById('rate').value) || 0) / 100;
         const n = parseInt(document.getElementById('compounding').value);
         const t = parseInt(document.getElementById('years').value) || 0;
 
-        const labels = [];
-        const dataCapital = [];
+        const e = (parseFloat(document.getElementById('entryFee').value) || 0) / 100;
+        const g = (parseFloat(document.getElementById('custodyFee').value) || 0) / 100;
+        const s = (parseFloat(document.getElementById('exitFee').value) || 0) / 100;
 
-        // Boucle pour calculer la valeur pour chaque année de 0 à t
+        const labels = [];
+        const dataWithFees = [];
+        const dataNoFees = [];
+
+        // Formatage pour l'affichage des devises
+        const currencyFormatter = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' });
+
         for (let i = 0; i <= t; i++) {
             labels.push(`Année ${i}`);
+
+            // 1. Calcul SANS frais : A = P * (1 + r/n)^(n*i)
+            const A_no_fees = P * Math.pow((1 + r / n), (n * i));
+            dataNoFees.push(A_no_fees.toFixed(2));
+
+            // 2. Calcul AVEC frais
+            // Étape a : Application des frais d'entrée uniquement sur le capital initial
+            const capitalInitialNet = P * (1 - e);
             
-            // Formule des intérêts composés : A = P * (1 + r/n)^(n*t)
-            const A = P * Math.pow((1 + r / n), (n * i));
-            dataCapital.push(A.toFixed(2));
+            // Étape b : Capitalisation avec impact des frais de garde (r - g)
+            let A_with_fees = capitalInitialNet * Math.pow((1 + (r - g) / n), (n * i));
+            
+            // Étape c : Application des frais de sortie (simulée sur l'année i actuelle)
+            if (i > 0) {
+                A_with_fees = A_with_fees * (1 - s);
+            } else {
+                // À l'année 0, si on retire immédiatement
+                A_with_fees = capitalInitialNet * (1 - s);
+            }
+            
+            dataWithFees.push(A_with_fees.toFixed(2));
         }
 
-        // Affichage du résultat final (dernier élément du tableau)
-        const capitalFinal = dataCapital[dataCapital.length - 1];
-        document.getElementById('final-result').textContent = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(capitalFinal);
+        // Affichage des deux résultats finaux
+        const finalWithFees = dataWithFees[dataWithFees.length - 1];
+        const finalNoFees = dataNoFees[dataNoFees.length - 1];
 
-        // Mise à jour ou création du graphique
+        document.getElementById('result-with-fees').textContent = currencyFormatter.format(finalWithFees);
+        document.getElementById('result-no-fees').textContent = currencyFormatter.format(finalNoFees);
+
+        // Configuration et mise à jour du graphique Chart.js
         const ctx = document.getElementById('interestChart').getContext('2d');
         
-        // Si le graphique existe déjà, on le détruit avant de le recréer pour éviter les superpositions au survol
         if (myChart) {
             myChart.destroy();
         }
@@ -215,15 +317,27 @@
             type: 'line',
             data: {
                 labels: labels,
-                datasets: [{
-                    label: 'Évolution du Capital (€)',
-                    data: dataCapital,
-                    borderColor: '#2563eb',
-                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.1
-                }]
+                datasets: [
+                    {
+                        label: 'Avec frais (Capital Net)',
+                        data: dataWithFees,
+                        borderColor: '#166534',
+                        backgroundColor: 'rgba(22, 101, 52, 0.05)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Sans aucun frais',
+                        data: dataNoFees,
+                        borderColor: '#94a3b8',
+                        borderDash: [5, 5], // Ligne en pointillés
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1
+                    }
+                ]
             },
             options: {
                 responsive: true,
@@ -231,6 +345,10 @@
                 plugins: {
                     legend: {
                         position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false // Permet de voir les deux valeurs en même temps au survol
                     }
                 },
                 scales: {
@@ -252,7 +370,7 @@
         });
     }
 
-    // Premier calcul automatique au chargement de la page
+    // Calcul initial automatique au chargement
     window.onload = function() {
         calculerInterets();
     };
